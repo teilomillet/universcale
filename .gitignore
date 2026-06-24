@@ -1,0 +1,6 @@
+/.venv/
+/dist/
+/.ruff_cache/
+/.pytest_cache/
+__pycache__/
+*.py[cod]
