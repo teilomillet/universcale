@@ -180,3 +180,16 @@ def test_missing_trace_file_errors_cleanly(tmp_path, capsys):
     rc = main([str(tmp_path / "nope.json")])
     assert rc == 1
     assert "error" in capsys.readouterr().err.lower()
+
+
+def test_cli_writes_html_with_usl_flame_and_bottlenecks(tmp_path, capsys):
+    trace = _write(tmp_path, "otlp.json", _concurrency_trace("vlm_extraction", [1, 2, 4, 8]))
+    out_html = tmp_path / "report.html"
+    rc = main([str(trace), "--operation", "vlm_extraction", "--html", str(out_html)])
+    assert rc == 0 and out_html.exists()
+    page = out_html.read_text(encoding="utf-8")
+    # One artifact carries all three views.
+    assert "Scaling (USL)" in page and "N<sub>max</sub>" in page
+    assert "Flame" in page and "<svg" in page
+    assert "Bottlenecks" in page
+    assert "vlm_extraction" in page
